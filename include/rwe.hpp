@@ -6,7 +6,6 @@
 #endif
 
 #include <utility> // std::forward
-#include <type_traits>
 
 #include <cstddef> // std::size_t
 #include <cstdint> // std::uintptr_t

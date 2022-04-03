@@ -123,7 +123,7 @@ namespace llmo
     }
 
     // Calls some function, but unprotects the region where it is.
-    template <class T, typename... Args, class R = detail::return_type<T>::type>
+    template <class T, typename... Args, class R = detail::return_type_T<T>>
     R Call(const std::uintptr_t address, Args... args)
     {
       ScopedProtectionRemover instance{address};

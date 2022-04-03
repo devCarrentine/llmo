@@ -4,13 +4,13 @@ namespace llmo {
 namespace rwe {
 
 ScopedProtectionRemover::ScopedProtectionRemover(
-  std::uintptr_t address, std::size_t size) :
+  const std::uintptr_t address, const std::size_t size) :
   m_address(address), m_size(size)
 {
-  if (0 == address) {
+  if (0u == address) {
     throw Exception::kAddressIsNull;
   }
-  else if (0 == size) {
+  else if (0u == size) {
     throw Exception::kSizeIsZero;
   }
   else if (!isRegionAvailable(address)) {
@@ -36,12 +36,12 @@ ScopedProtectionRemover::~ScopedProtectionRemover()
   }
 }
 
-bool isRegionAvailable(std::uintptr_t address)
+bool isRegionAvailable(const std::uintptr_t address)
 {
   ::MEMORY_BASIC_INFORMATION mbi{};
   void* pointer{reinterpret_cast<void*>(address)};
 
-  if (0 != ::VirtualQuery(pointer, &mbi, sizeof(mbi)))
+  if (0u != ::VirtualQuery(pointer, &mbi, sizeof(mbi)))
   {
     if (mbi.State == MEM_COMMIT) {
       return true;
@@ -52,9 +52,9 @@ bool isRegionAvailable(std::uintptr_t address)
 }
 
 bool setProtectionLevel(
-  std::uintptr_t address,
-  std::size_t size,
-  MemoryProtection next,
+  const std::uintptr_t address,
+  const std::size_t size,
+  const MemoryProtection next,
   MemoryProtection& previous)
 {
   return TRUE == ::VirtualProtect(
@@ -63,21 +63,34 @@ bool setProtectionLevel(
     reinterpret_cast<::PDWORD>(&previous));
 }
 
-void Set(std::uintptr_t address, std::int32_t value, std::size_t size)
+void Set(
+  const std::uintptr_t address, 
+  const std::int32_t value, 
+  const std::size_t size)
 {
   ScopedProtectionRemover instance{address, size};
   std::memset(reinterpret_cast<void*>(address), value, size);
 }
 
-void Nop(std::uintptr_t address, std::size_t size) {
+void Nop(
+  const std::uintptr_t address, 
+  const std::size_t size)
+{
   Set(address, 0x90, size);
 }
 
-void Set(void* pointer, std::int32_t value, std::size_t size) {
+void Set(
+  const void* pointer, 
+  const std::int32_t value, 
+  const std::size_t size)
+{
   Set(reinterpret_cast<std::uintptr_t>(pointer), value, size);
 }
 
-void Nop(void* pointer, std::size_t size) {
+void Nop(
+  const void* pointer, 
+  const std::size_t size)
+{
   Nop(reinterpret_cast<std::uintptr_t>(pointer), size);
 }
 

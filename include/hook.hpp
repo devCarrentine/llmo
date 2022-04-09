@@ -1,10 +1,8 @@
 #ifndef LLMO_HOOK_HPP
 #define LLMO_HOOK_HPP
 
-#include <cstdint>
-#include <cstdlib>
-#include <stdexcept>
-#include <functional>
+#include <cstdint> // std::uintptr_t
+#include <stdexcept> // std::exception
 
 #include "rwe.hpp"
 #include "../third-party/minhook/include/MinHook.h"

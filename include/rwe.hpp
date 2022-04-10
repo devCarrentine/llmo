@@ -6,6 +6,7 @@
 #endif
 
 #include <utility> // std::forward
+#include <stdexcept> // std::exception
 
 #include <cstddef> // std::size_t
 #include <cstdint> // std::uintptr_t
@@ -40,12 +41,35 @@ namespace llmo
     class ScopedProtectionRemover
     {
     public:
-      enum class Exception
+      // Exception class.
+      class Exception : public std::exception
       {
-        kAddressIsNull,
-        kRegionIsNotAvailable,
-        kSizeIsZero,
-        kVirtualProtectFailed,
+      public:
+        enum class Code
+        {
+          kAddressIsNull,
+          kRegionIsNotAvailable,
+          kSizeIsZero,
+          kVirtualProtectFailed,
+        };
+
+        Exception(const std::uintptr_t address, const Code code) :
+          std::exception{}, m_address(address), m_code(code) {}
+
+        Exception(const Code code) :
+          std::exception{}, m_code(code) {}
+
+        std::uintptr_t getAddress() {
+          return m_address;
+        }
+
+        Code getCode() {
+          return m_code;
+        }
+
+      private:
+        std::uintptr_t m_address{};
+        Code m_code{Code::kAddressIsNull};
       };
 
       ScopedProtectionRemover(
@@ -63,6 +87,7 @@ namespace llmo
     };
 
     using Exception = ScopedProtectionRemover::Exception;
+    using Code = Exception::Code;
 
     void flushInstructionCache(
       const std::uintptr_t address, 

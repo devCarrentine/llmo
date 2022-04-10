@@ -8,20 +8,20 @@ ScopedProtectionRemover::ScopedProtectionRemover(
   m_address(address), m_size(size)
 {
   if (0u == address) {
-    throw Exception::kAddressIsNull;
+    throw Exception{address, Code::kAddressIsNull};
   }
   else if (0u == size) {
-    throw Exception::kSizeIsZero;
+    throw Exception{address, Code::kSizeIsZero};
   }
   else if (!isRegionAvailable(address)) {
-    throw Exception::kRegionIsNotAvailable;
+    throw Exception{address, Code::kRegionIsNotAvailable};
   }
 
   if (!setProtectionLevel(m_address, m_size,
     MemoryProtection::kPageExecuteReadWrite,
     m_protectionLevel))
   {
-    throw Exception::kVirtualProtectFailed;
+    throw Exception{address, Code::kVirtualProtectFailed};
   }
 }
 
@@ -32,7 +32,7 @@ ScopedProtectionRemover::~ScopedProtectionRemover()
     m_protectionLevel,
     m_protectionLevel))
   {
-    throw Exception::kVirtualProtectFailed;
+    throw Exception{m_address, Code::kVirtualProtectFailed};
   }
 }
 

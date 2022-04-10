@@ -12,21 +12,20 @@ namespace llmo
   // Function interception.
   namespace hook
   {
-    // Hook exception codes.
-    enum class Code
-    {
-      kCouldNotInitialize,
-      kCouldNotUninitialize,
-      kCouldNotCreate,
-      kCouldNotRemove,
-      kCouldNotEnable,
-      kCouldNotDisable,
-    };
-
     // Hook exception class.
     class Exception : public std::exception
     {
     public:
+      // Hook exception codes.
+      enum class Code
+      {
+        kCouldNotInitialize,
+        kCouldNotUninitialize,
+        kCouldNotCreate,
+        kCouldNotEnable,
+        kCouldNotDisable,
+      };
+
       Exception(const std::uintptr_t address, const Code code) :
         std::exception{}, m_address(address), m_code(code) {}
 
@@ -46,7 +45,9 @@ namespace llmo
       Code m_code{Code::kCouldNotInitialize};
     };
 
-    // Hook engine singleton, MinHook by default.
+    using Code = Exception::Code;
+
+    // Hook engine, MinHook by default.
     // Throws llmo::Hook::Exception.
     class Engine
     {
@@ -54,14 +55,14 @@ namespace llmo
       // Initialises hook engine.
       // It's private because should be called exactly once.
       // That's constructor's business.
-      virtual bool Initialize() {
+      static bool Initialize() {
         return MH_OK == MH_Initialize();
       }
 
       // Uninitialises hook engine.
       // It's private because should be called exactly once.
       // That's destructor's business.
-      virtual bool Uninitialize() {
+      static bool Uninitialize() {
         return MH_OK == MH_Uninitialize();
       }
 
@@ -85,11 +86,13 @@ namespace llmo
       }
       
       // Creates hook, but doesn't enable.
-      virtual bool Create(
+      static bool Create(
         const std::uintptr_t address, 
         const void* function, 
         void** original)
       {
+        static Engine instance{};
+
         return MH_OK == MH_CreateHook(
           reinterpret_cast<::LPVOID>(address), 
           const_cast<::LPVOID>(function), original);
@@ -98,7 +101,7 @@ namespace llmo
       // Template for create function.
       // T should be pointer to original.
       template <class T>
-      bool Create(
+      static bool Create(
         const std::uintptr_t address, 
         const void* function, 
         T original)
@@ -108,24 +111,18 @@ namespace llmo
       }
 
       // Enables hook. Should be called after the creation.
-      virtual bool Enable(const std::uintptr_t address) {
+      static bool Enable(const std::uintptr_t address) {
         return MH_OK == MH_EnableHook(reinterpret_cast<::LPVOID>(address));
       }
 
       // Disables hook, but doesn't remove.
-      virtual bool Disable(const std::uintptr_t address) {
+      static bool Disable(const std::uintptr_t address) {
         return MH_OK == MH_DisableHook(reinterpret_cast<::LPVOID>(address));
       }
 
       // Removes hook.
-      virtual bool Remove(const std::uintptr_t address) {
+      static bool Remove(const std::uintptr_t address) {
         return MH_OK == MH_RemoveHook(reinterpret_cast<::LPVOID>(address));
-      }
-
-      static Engine& getInstance()
-      {
-        static Engine instance{};
-        return instance;
       }
     };
 
@@ -142,11 +139,8 @@ namespace llmo
       Hook(const void* function) : Hook{reinterpret_cast<std::uintptr_t>(function)} {}
 
       // Removes hook.
-      ~Hook()
-      {
-        if (!Engine::getInstance().Remove(m_address)) {
-          throw Exception{m_address, Code::kCouldNotRemove};
-        }
+      ~Hook() {
+        Engine::Remove(m_address);
       }
 
       // Enables hook. Hook will be created at the first call.
@@ -155,7 +149,7 @@ namespace llmo
       {
         if (!m_isCreated)
         {
-          if (!Engine::getInstance().Create(m_address, function, &m_original)) {
+          if (!Engine::Create(m_address, function, &m_original)) {
             throw Exception{m_address, Code::kCouldNotCreate};
           }
 
@@ -164,7 +158,7 @@ namespace llmo
 
         if (!m_isEnabled)
         {
-          if (!Engine::getInstance().Enable(m_address)) {
+          if (!Engine::Enable(m_address)) {
             throw Exception{m_address, Code::kCouldNotEnable};
           }
 
@@ -177,7 +171,7 @@ namespace llmo
       {
         if (m_isEnabled)
         {
-          if (!Engine::getInstance().Disable(m_address)) {
+          if (!Engine::Disable(m_address)) {
             throw Exception{m_address, Code::kCouldNotDisable};
           }
 

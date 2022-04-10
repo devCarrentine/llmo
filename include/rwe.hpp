@@ -141,7 +141,7 @@ namespace llmo
 
     template <typename T>
     T Read(const void* pointer) {
-      return Read(reinterpret_cast<std::uintptr_t>(pointer));
+      return Read<T>(reinterpret_cast<std::uintptr_t>(pointer));
     }
 
     template <typename T>

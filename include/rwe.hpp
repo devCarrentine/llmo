@@ -130,11 +130,11 @@ namespace llmo
     }
 
     // Calls some function, but unprotects the region where it is.
-    template <class T, typename... Args, class R = detail::return_type_T<T>>
-    R Call(const std::uintptr_t address, Args... args)
+    template <class T, typename ... Args, class R = detail::return_type_T<T>>
+    R Call(const std::uintptr_t address, Args ... args)
     {
       ScopedProtectionRemover instance{address};
-      return reinterpret_cast<T>(address)(std::forward<Args>(args)...);
+      return reinterpret_cast<T>(address)(std::forward<Args>(args) ...);
     }
 
     // overloads with void* instead of std::uintptr_t as address
@@ -159,6 +159,11 @@ namespace llmo
     template <typename T>
     void Copy(const void* address, const T source, const std::size_t size) {
       Copy(reinterpret_cast<std::uintptr_t>(address), source, size);
+    }
+
+    template <class T, typename... Args, class R = detail::return_type_T<T>>
+    R Call(const void* pointer, Args ... args) {
+      return Call<T>(reinterpret_cast<std::uintptr_t>(pointer), args ...);
     }
   } // namespace rwe
 } // namespace llmo

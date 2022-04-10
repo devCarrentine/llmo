@@ -1,5 +1,5 @@
 # llmo
-## Library for low-level memory operations and hooking.
+## Library for low-level memory operations and hooking. Fully compliant with C++11 standard.
 
 ```cpp
 #include <cstdio>

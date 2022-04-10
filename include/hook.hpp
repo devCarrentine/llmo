@@ -20,7 +20,6 @@ namespace llmo
       enum class Code
       {
         kCouldNotInitialize,
-        kCouldNotUninitialize,
         kCouldNotCreate,
         kCouldNotEnable,
         kCouldNotDisable,

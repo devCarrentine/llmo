@@ -4,7 +4,6 @@
 
 ```cpp
 #include <cstdio>
-#include <string>
 
 #include "../include/rwe.hpp"
 #include "../include/hook.hpp"

@@ -77,12 +77,8 @@ namespace llmo
 
     public:
       // Uninitializes hook engine.
-      // Throws kCouldNotUninitialize if hook engine could not uninitialise.
-      ~Engine()
-      {
-        if (!Uninitialize()) {
-          throw Exception{Code::kCouldNotUninitialize};
-        }
+      ~Engine() {
+        Uninitialize();
       }
       
       // Creates hook, but doesn't enable.

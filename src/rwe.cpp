@@ -36,6 +36,16 @@ ScopedProtectionRemover::~ScopedProtectionRemover()
   }
 }
 
+void flushInstructionCache(
+  const std::uintptr_t address, 
+  const std::size_t size)
+{
+  ::FlushInstructionCache(
+    ::GetCurrentProcess(), 
+    reinterpret_cast<::LPCVOID>(address), 
+    size);
+}
+
 bool isRegionAvailable(const std::uintptr_t address)
 {
   ::MEMORY_BASIC_INFORMATION mbi{};
@@ -70,6 +80,7 @@ void Set(
 {
   ScopedProtectionRemover instance{address, size};
   std::memset(reinterpret_cast<void*>(address), value, size);
+  flushInstructionCache(address, size);
 }
 
 void Nop(

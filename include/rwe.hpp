@@ -64,6 +64,10 @@ namespace llmo
 
     using Exception = ScopedProtectionRemover::Exception;
 
+    void flushInstructionCache(
+      const std::uintptr_t address, 
+      const std::size_t size);
+
     // Calls VirtualQuery and returns true if mbi.State is MEM_COMMIT.
     // It's necessary to call always when you're going to work with the memory.
     bool isRegionAvailable(const std::uintptr_t address);
@@ -87,6 +91,8 @@ namespace llmo
       ScopedProtectionRemover instance{address, sizeof(out)};
       std::memcpy(&out, reinterpret_cast<void*>(address), sizeof(out));
 
+      flushInstructionCache(address, sizeof(out));
+
       return out;
     }
 
@@ -97,6 +103,7 @@ namespace llmo
     {
       ScopedProtectionRemover instance{address, sizeof(in)};
       std::memcpy(reinterpret_cast<void*>(address), &in, sizeof(in));
+      flushInstructionCache(address, sizeof(in));
     }
 
     // Absolutely safe alternative for std::memset.
@@ -119,6 +126,7 @@ namespace llmo
     {
       ScopedProtectionRemover instance{address, size};
       std::memcpy(reinterpret_cast<void*>(address), source, size);
+      flushInstructionCache(address, size);
     }
 
     // Calls some function, but unprotects the region where it is.

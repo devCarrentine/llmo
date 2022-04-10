@@ -27,13 +27,10 @@ ScopedProtectionRemover::ScopedProtectionRemover(
 
 ScopedProtectionRemover::~ScopedProtectionRemover()
 {
-  if (!setProtectionLevel(
+  setProtectionLevel(
     m_address, m_size,
     m_protectionLevel,
-    m_protectionLevel))
-  {
-    throw Exception{m_address, Code::kVirtualProtectFailed};
-  }
+    m_protectionLevel);
 }
 
 void flushInstructionCache(
